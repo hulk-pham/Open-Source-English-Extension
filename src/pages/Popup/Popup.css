@@ -1,0 +1,84 @@
+.container {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  text-align: center;
+  height: 100%;
+  padding: 10px;
+  /* background-color: #282c34; */
+}
+
+.header {
+  padding: 10px;
+  font-size: calc(10px + 2vmin);
+  color: #022833;
+  font-weight: bold;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.word-container {
+  color: #022833;
+  padding: 30px 10px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  font-size: 14px;
+  justify-content: start;
+  align-items: start;
+  overflow: auto;
+  max-height: 400px;
+  min-height: 50px;
+}
+
+.word-container .word {
+  text-align: left;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.word-container .word:hover {
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 12px;
+}
+
+.tool-tip-container {
+  margin-top: 4px;
+}
+
+.word .icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+}
+
+.empty-container {
+  padding: 30px;
+  color: #022833;
+  font-weight: bold;
+}
+
+.empty-container .icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 20px;
+}
+
+
+.header .nav-bar {
+  display: flex;
+  justify-content: space-between;
+  font-weight: normal;
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.nav-bar .clear-all {
+  cursor: pointer;
+  color: red;
+}
