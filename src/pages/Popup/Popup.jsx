@@ -1,39 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import speakerIcon from '../../assets/img/icons8-speaker-30.png';
 import browserIcon from '../../assets/img/icons8-browser-30.png';
-import trashIcon from '../../assets/img/icons8-trash-30.png';
+import removeAllIcon from '../../assets/img/icons8-disposal-40.png';
 import emptyIcon from '../../assets/img/icons8-empty-flag-30.png';
+import exportCSVIcon from '../../assets/img/icons8-export-csv-40.png';
+import importCSVIcon from '../../assets/img/icons8-import-csv-40.png';
+import speakerIcon from '../../assets/img/icons8-speaker-30.png';
+import gridIcon from '../../assets/img/icons8-grid-40.png';
+import listIcon from '../../assets/img/icons8-list-40.png';
+import trashIcon from '../../assets/img/icons8-trash-30.png';
+import { deleteAllWord, deleteWord, importData, load, openDictionary, speak } from './utils';
+import * as XLSX from 'xlsx';
 import './Popup.css';
 
-const speak = (word) => {
-  if ('speechSynthesis' in window) {
-    var synthesis = window.speechSynthesis;
-
-    // Get the first `en` language voice in the list
-    var voice = synthesis.getVoices().filter(function (voice) {
-      return voice.lang === 'en-US';
-    })[0];
-
-    // Create an utterance object
-    var utterance = new SpeechSynthesisUtterance(word);
-
-    // Set utterance properties
-    utterance.voice = voice;
-    // utterance.pitch = 1.5;
-    utterance.rate = 0.8;
-    utterance.volume = 0.6;
-
-    // Speak the utterance
-    synthesis.speak(utterance);
-  } else {
-    console.log('Text-to-speech not supported.');
-  }
-}
-
-const Word = ({ word, onClickWord, onSpeak, onBrowser, onDelete }) => {
+const Word = ({ word, onClickWord, onSpeak, onBrowser, onDelete, layout }) => {
   return (
-    <div className='word'>
-      <span onClick={() => onClickWord(word)}>{word}</span>
+    <div className={`word ${layout}`}>
+      <div>
+        <span onClick={() => onClickWord(word)}>{word.text}</span>
+      </div>
+      {word.meaning && <div className='meaning'>{word.meaning}</div>}
       <div className='tool-tip-container'>
         <img className='icon' src={speakerIcon} alt='speaker' onClick={() => onSpeak(word)} />
         <img className='icon' src={browserIcon} alt='speaker' onClick={() => onBrowser(word)} />
@@ -51,50 +36,90 @@ const Empty = () => {
     </div>
   );
 }
+
 const Popup = () => {
   const [words, setWords] = useState([]);
+  const [layout, setLayout] = useState('grid');
   useEffect(() => {
-    chrome.storage.sync.get("data", function ({ data }) {
-      const wordInStorage = data?.words || [];
-      setWords(wordInStorage);
-    });
+    load(setWords);
   }, []);
 
   const onClickWord = (word) => {
   }
 
   const onSpeak = (word) => {
-    speak(word);
+    speak(word.text);
   }
 
   const onBrowser = (word) => {
-    chrome.tabs.create({ url: `https://dictionary.cambridge.org/vi/dictionary/english/${word}` });
+    openDictionary(word);
   }
 
   const onDelete = (word) => {
-    chrome.storage.sync.get("data", function ({ data }) {
-      const words = data?.words || [];
-      const newWords = words.filter(w => w !== word);
-      chrome.storage.sync.set({ "data": { words: newWords } }, function () {
-        setWords(newWords);
-      });
-    });
+    deleteWord(word, setWords);
+  }
+
+  const onExport = () => {
+    exportData(words);
+  }
+
+  const handleFileUpload = (e) => {
+    importData(e, setWords);
+  };
+
+  const clearAll = () => {
+    deleteAllWord(setWords);
+  }
+
+  const exportData = (words) => {
+    const data = words.map((word) => ({
+      Word: word.text,
+      Meaning: word.meaning,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    const todayString = new Date().toISOString().split('T')[0];
+    console.log(todayString);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Vocabulary");
+    XLSX.writeFile(workbook, `Word-Saver-${todayString}.xlsx`);
+    console.log(todayString);
   }
 
   return (
     <div className="container">
       <header className="header">
-        <span></span>
+        <div className='nav-bar left'>
+          <span className={`icons ${layout == 'grid' ? '' : 'gray'}`} onClick={() => setLayout('grid')} alt='Grid'>
+            <img className='icon' src={gridIcon} />
+          </span>
+          <span className={`icons ${layout == 'list' ? '' : 'gray'}`} onClick={() => setLayout('list')} alt='List'>
+            <img className='icon' src={listIcon} />
+          </span>
+
+        </div>
         Word Saver
         <div className='nav-bar'>
-          {/* <span className='clear-all'>Clear All</span> */}
+          <label for="upload">
+            <span className='icons' alt='Import'>
+              <img className='icon' src={importCSVIcon} />
+            </span>
+            <input type="file" id="upload" onChange={handleFileUpload} style={{ display: 'none' }} />
+          </label>
+
+          <span className='icons' onClick={onExport} alt='Export'>
+            <img className='icon' src={exportCSVIcon} />
+          </span>
+          <span className='icons' onClick={clearAll} alt='Remove All'>
+            <img className='icon' src={removeAllIcon} />
+          </span>
         </div>
       </header>
       {
         words.length === 0
           ? <Empty />
           :
-          <main className='word-container'>
+          <main className={`word-container ${layout}`}>
             {
               words.map((word, index) => <Word
                 word={word}
@@ -103,6 +128,7 @@ const Popup = () => {
                 onSpeak={onSpeak}
                 onBrowser={onBrowser}
                 onDelete={onDelete}
+                layout={layout}
               />)
             }
           </main>

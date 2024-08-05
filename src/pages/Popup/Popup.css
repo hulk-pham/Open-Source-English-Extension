@@ -12,7 +12,7 @@
 
 .header {
   padding: 10px;
-  font-size: calc(10px + 2vmin);
+  font-size: 24px;
   color: #022833;
   font-weight: bold;
   display: grid;
@@ -23,14 +23,17 @@
   color: #022833;
   padding: 30px 10px;
   display: grid;
+  overflow: auto;
+  max-height: 400px;
+  min-height: 50px;
+}
+
+.word-container.grid {
   gap: 10px;
   grid-template-columns: repeat(4, 1fr);
   font-size: 14px;
   justify-content: start;
   align-items: start;
-  overflow: auto;
-  max-height: 400px;
-  min-height: 50px;
 }
 
 .word-container .word {
@@ -51,10 +54,28 @@
   margin-top: 4px;
 }
 
+.word.list .tool-tip-container {
+  text-align: right;
+  margin: 0;
+}
+
 .word .icon {
   width: 14px;
   height: 14px;
   margin-right: 8px;
+}
+
+.word .meaning {
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.word.list {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
 }
 
 .empty-container {
@@ -78,7 +99,21 @@
   font-size: 12px;
 }
 
-.nav-bar .clear-all {
+.header .nav-bar.left {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.nav-bar .icons {
   cursor: pointer;
-  color: red;
+}
+
+.nav-bar .icons .icon {
+  width: 20px;
+  height: 20px;
+  margin: 0 5px;
+}
+
+.icons.gray {
+  opacity: 0.5;
 }
