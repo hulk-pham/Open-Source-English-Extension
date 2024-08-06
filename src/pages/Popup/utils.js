@@ -25,10 +25,9 @@ export const openDictionary = (word) => {
     chrome.tabs.create({ url: `https://dictionary.cambridge.org/vi/dictionary/english/${word.text}` });
 }
 
-
 export const exportData = (words) => {
     const data = words.map((word) => ({
-        Word: word.text,
+        Word: word.text?.toLowerCase(),
         Meaning: word.meaning,
     }));
 
@@ -51,7 +50,7 @@ export const importData = (e, setWords) => {
         const sheetData = XLSX.utils.sheet_to_json(sheet);
 
         const words = sheetData.map((row) => ({
-            text: row.Word,
+            text: row.Word?.toLowerCase(),
             meaning: row.Meaning,
         }));
 
@@ -80,6 +79,16 @@ export const deleteWord = (word, setWords) => {
     });
 }
 
+export const updateWordMeaning = (word, meaning, setWords) => {
+    chrome.storage.sync.get("data", function ({ data }) {
+        const words = data?.words || [];
+        const newWords = words.map(w => w.text === word.text ? { ...w, meaning } : w);
+        chrome.storage.sync.set({ "data": { words: newWords } }, function () {
+            setWords(newWords);
+        });
+    });
+}
+
 export const load = (setWords) => {
     chrome.storage.sync.get("data", function ({ data }) {
         setWords(data?.words || []);
@@ -98,3 +107,7 @@ export const addWordBackground = (word) => {
         });
     });
 }
+
+export const copyClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+} 

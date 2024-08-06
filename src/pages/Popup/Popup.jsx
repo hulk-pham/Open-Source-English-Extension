@@ -1,24 +1,26 @@
 import React, { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
 import browserIcon from '../../assets/img/icons8-browser-30.png';
 import removeAllIcon from '../../assets/img/icons8-disposal-40.png';
 import emptyIcon from '../../assets/img/icons8-empty-flag-30.png';
 import exportCSVIcon from '../../assets/img/icons8-export-csv-40.png';
-import importCSVIcon from '../../assets/img/icons8-import-csv-40.png';
-import speakerIcon from '../../assets/img/icons8-speaker-30.png';
 import gridIcon from '../../assets/img/icons8-grid-40.png';
+import importCSVIcon from '../../assets/img/icons8-import-csv-40.png';
 import listIcon from '../../assets/img/icons8-list-40.png';
+import speakerIcon from '../../assets/img/icons8-speaker-30.png';
 import trashIcon from '../../assets/img/icons8-trash-30.png';
-import { deleteAllWord, deleteWord, importData, load, openDictionary, speak } from './utils';
-import * as XLSX from 'xlsx';
 import './Popup.css';
+import { copyClipboard, deleteAllWord, deleteWord, exportData, importData, load, openDictionary, speak, updateWordMeaning } from './utils';
 
-const Word = ({ word, onClickWord, onSpeak, onBrowser, onDelete, layout }) => {
+const Word = ({ word, onClickWord, onSpeak, onBrowser, onDelete, layout, openPopupMeaning }) => {
   return (
     <div className={`word ${layout}`}>
-      <div>
+      <div className='word-text'>
         <span onClick={() => onClickWord(word)}>{word.text}</span>
       </div>
-      {word.meaning && <div className='meaning'>{word.meaning}</div>}
+      <div className='meaning' onClick={() => openPopupMeaning(word)}>{
+        word.meaning ? word.meaning : "?"
+      }</div>
       <div className='tool-tip-container'>
         <img className='icon' src={speakerIcon} alt='speaker' onClick={() => onSpeak(word)} />
         <img className='icon' src={browserIcon} alt='speaker' onClick={() => onBrowser(word)} />
@@ -39,12 +41,15 @@ const Empty = () => {
 
 const Popup = () => {
   const [words, setWords] = useState([]);
+  const [selectedWord, setSelectedWord] = useState(null);
+  const [selectedMeaning, setSelectedMeaning] = useState('');
   const [layout, setLayout] = useState('grid');
   useEffect(() => {
     load(setWords);
   }, []);
 
   const onClickWord = (word) => {
+    copyClipboard(word.text);
   }
 
   const onSpeak = (word) => {
@@ -71,19 +76,19 @@ const Popup = () => {
     deleteAllWord(setWords);
   }
 
-  const exportData = (words) => {
-    const data = words.map((word) => ({
-      Word: word.text,
-      Meaning: word.meaning,
-    }));
+  const openPopupMeaning = (word) => {
+    setSelectedWord(word);
+    setSelectedMeaning(word.meaning || '');
+  }
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    const todayString = new Date().toISOString().split('T')[0];
-    console.log(todayString);
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Vocabulary");
-    XLSX.writeFile(workbook, `Word-Saver-${todayString}.xlsx`);
-    console.log(todayString);
+  const submitChangeMeaning = () => {
+    updateWordMeaning(selectedWord, selectedMeaning, setWords);
+    setSelectedWord(null);
+    setSelectedMeaning('');
+  }
+
+  const onChangeText = (e) => {
+    setSelectedMeaning(e.target.value);
   }
 
   return (
@@ -128,16 +133,24 @@ const Popup = () => {
                 onSpeak={onSpeak}
                 onBrowser={onBrowser}
                 onDelete={onDelete}
+                openPopupMeaning={openPopupMeaning}
                 layout={layout}
               />)
             }
           </main>
 
       }
+      {
+        selectedWord && <article className='popup'>
+          <input type='text' value={selectedMeaning} onChange={onChangeText} />
+          <button className='submit' onClick={submitChangeMeaning}>Save</button>
+          <button className='close' onClick={() => setSelectedWord(null)}>Close</button>
+        </article>
+      }
 
-      {/* <article className='footer'>
-        <embed type="text/hrml" src={`https://dictionary.cambridge.org/vi/dictionary/english/${selectedWord}`} width="300" height="200" />
-      </article> */}
+      <article className='footer'>
+        <p> Powererd by Hulk Pham </p>
+      </article>
     </div>
   );
 };
