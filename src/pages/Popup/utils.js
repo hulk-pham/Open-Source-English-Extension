@@ -89,6 +89,19 @@ export const updateWordMeaning = (word, meaning, setWords) => {
     });
 }
 
+export const addWord = (word, meaning, setWords) => {
+    chrome.storage.sync.get("data", function ({ data }) {
+        const words = data?.words || [];
+        words.unshift({
+            text: word,
+            meaning
+        });
+        chrome.storage.sync.set({ "data": { words } }, function () {
+            setWords(words);
+        });
+    });
+}
+
 export const load = (setWords) => {
     chrome.storage.sync.get("data", function ({ data }) {
         setWords(data?.words || []);
@@ -110,4 +123,8 @@ export const addWordBackground = (word) => {
 
 export const copyClipboard = (text) => {
     navigator.clipboard.writeText(text);
-} 
+}
+
+export const openGithub = () => {
+    chrome.tabs.create({ url: 'https://github.com/hulk-pham/english-extension' });
+}

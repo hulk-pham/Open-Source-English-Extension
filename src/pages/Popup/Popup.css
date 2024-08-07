@@ -36,6 +36,14 @@
   align-items: start;
 }
 
+.word-container.list {
+  gap: 10px;
+  grid-template-columns: 1fr;
+  font-size: 14px;
+  justify-content: start;
+  align-items: start;
+}
+
 .word-container .word {
   text-align: left;
   padding: 10px;
@@ -130,6 +138,7 @@
   width: 100%;
   background-color: #52505361;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -169,4 +178,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.mb-1 {
+  margin-bottom: 8px;
 }

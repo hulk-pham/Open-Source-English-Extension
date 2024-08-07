@@ -8,6 +8,7 @@
 
 
 ## Features
+- Add word manually
 - Add word from context menu
 - Speak
 - Open dictionary page

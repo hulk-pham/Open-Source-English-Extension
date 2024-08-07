@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import * as XLSX from 'xlsx';
 import browserIcon from '../../assets/img/icons8-browser-30.png';
 import removeAllIcon from '../../assets/img/icons8-disposal-40.png';
 import emptyIcon from '../../assets/img/icons8-empty-flag-30.png';
@@ -9,8 +8,9 @@ import importCSVIcon from '../../assets/img/icons8-import-csv-40.png';
 import listIcon from '../../assets/img/icons8-list-40.png';
 import speakerIcon from '../../assets/img/icons8-speaker-30.png';
 import trashIcon from '../../assets/img/icons8-trash-30.png';
+import addIcon from '../../assets/img/icons8-input-40.png';
 import './Popup.css';
-import { copyClipboard, deleteAllWord, deleteWord, exportData, importData, load, openDictionary, speak, updateWordMeaning } from './utils';
+import { addWord, copyClipboard, deleteAllWord, deleteWord, exportData, importData, load, openDictionary, openGithub, speak, updateWordMeaning } from './utils';
 
 const Word = ({ word, onClickWord, onSpeak, onBrowser, onDelete, layout, openPopupMeaning }) => {
   return (
@@ -43,6 +43,11 @@ const Popup = () => {
   const [words, setWords] = useState([]);
   const [selectedWord, setSelectedWord] = useState(null);
   const [selectedMeaning, setSelectedMeaning] = useState('');
+
+  const [adding, setAdding] = useState(false);
+  const [newWord, setNewWord] = useState('');
+  const [newMeaning, setNewMeaning] = useState('');
+
   const [layout, setLayout] = useState('grid');
   useEffect(() => {
     load(setWords);
@@ -87,6 +92,15 @@ const Popup = () => {
     setSelectedMeaning('');
   }
 
+  const submitAddWord = () => {
+    if (newWord && newMeaning) {
+      addWord(newWord, newMeaning, setWords);
+    }
+    setAdding(false);
+    setNewWord('');
+    setNewMeaning('');
+  }
+
   const onChangeText = (e) => {
     setSelectedMeaning(e.target.value);
   }
@@ -105,6 +119,9 @@ const Popup = () => {
         </div>
         Word Saver
         <div className='nav-bar'>
+          <span className='icons' onClick={() => { setAdding(true) }} alt='Add'>
+            <img className='icon' src={addIcon} />
+          </span>
           <label for="upload">
             <span className='icons' alt='Import'>
               <img className='icon' src={importCSVIcon} />
@@ -142,14 +159,29 @@ const Popup = () => {
       }
       {
         selectedWord && <article className='popup'>
-          <input type='text' value={selectedMeaning} onChange={onChangeText} />
-          <button className='submit' onClick={submitChangeMeaning}>Save</button>
-          <button className='close' onClick={() => setSelectedWord(null)}>Close</button>
+          <input type='text' value={selectedMeaning} onChange={onChangeText} className='mb-1' placeholder='Meaning' />
+          <div>
+            <button className='submit' onClick={submitChangeMeaning}>Save</button>
+            <button className='close' onClick={() => setSelectedWord(null)}>Close</button>
+          </div>
         </article>
       }
-
+      {
+        adding && <article className='popup'>
+          <div>
+            <input type='text' value={newWord} onChange={(e) => { setNewWord(e.target.value) }} className='mb-1' placeholder='Word' />
+          </div>
+          <div>
+            <input type='text' value={newMeaning} onChange={(e) => { setNewMeaning(e.target.value) }} className='mb-1' placeholder='Meaning' />
+          </div>
+          <div>
+            <button className='submit' onClick={submitAddWord}>Save</button>
+            <button className='close' onClick={() => setAdding(false)}>Close</button>
+          </div>
+        </article>
+      }
       <article className='footer'>
-        <p> Powererd by Hulk Pham </p>
+        <p onClick={openGithub}>Powererd by <strong>Hulk Pham</strong></p>
       </article>
     </div>
   );
